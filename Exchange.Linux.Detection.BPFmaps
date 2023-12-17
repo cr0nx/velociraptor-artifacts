@@ -1,0 +1,26 @@
+name: Exchange.Linux.Detection.BPFmaps
+author: "@cr0nym / Leszek Mis"
+description: |
+   This artifact will parse /proc/*/fd/* files and look for processes 
+    that have been created bpf-maps
+    
+
+type: CLIENT
+
+precondition: SELECT OS From info() where OS = "linux"
+
+parameters:
+  - name: FileNameGlob
+    description: Glob pattern to search
+    default: "/proc/*/fd/*/"
+    type: str
+
+  - name: SearchRegex
+    description: Pattern to match looking for bpf-maps executions
+    default: "^anon_inode:bpf-map"
+    type: regex
+
+sources:
+- name: findBPFmaps
+  query: |
+    SELECT * FROM glob(globs=FileNameGlob, accessor='file') WHERE Data.Link =~ SearchRegex
